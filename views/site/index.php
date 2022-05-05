@@ -1,52 +1,80 @@
 <?php
 
-/** @var yii\web\View $this */
+use app\models\Candidates;
+use yii\grid\ActionColumn;
+use yii\grid\GridView;
+use yii\helpers\Html;
+use yii\helpers\Url;
 
-$this->title = 'My Yii Application';
-echo 'DEBUG'
+/* @var $this yii\web\View */
+/* @var $searchModel app\models\search\CandidatesSearch */
+/* @var $dataProvider yii\data\ActiveDataProvider */
+
+$this->title = 'PHP Candidates';
 ?>
 <div class="site-index">
 
     <div class="jumbotron text-center bg-transparent">
-        <h1 class="display-4">Basic!</h1>
+        <h1 class="display-4">PHP Candidates list</h1>
 
-        <p class="lead">You have successfully created your Yii-powered application.</p>
-
-        <p><a class="btn btn-lg btn-success" href="http://www.yiiframework.com">Get started with Yii</a></p>
+        <?php if (!Yii::$app->user->isGuest): ?>
+            <p>
+                <?= Html::a('Create Candidate', ['create'], ['class' => 'btn btn-success']) ?>
+            </p>
+        <?php endif; ?>
     </div>
 
     <div class="body-content">
-
         <div class="row">
-            <div class="col-lg-4">
-                <h2>Heading</h2>
+            <div class="col-lg-12">
+                <?php if(Yii::$app->user->isGuest): ?>
+                    <h3>Login to see list of candidates</h3>
+                <?php else: ?>
 
-                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et
-                    dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip
-                    ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
-                    fugiat nulla pariatur.</p>
+                    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
-                <p><a class="btn btn-outline-secondary" href="http://www.yiiframework.com/doc/">Yii Documentation &raquo;</a></p>
-            </div>
-            <div class="col-lg-4">
-                <h2>Heading</h2>
+                    <?= GridView::widget([
+                        'dataProvider' => $dataProvider,
+                        'columns' => [
+                            ['class' => 'yii\grid\SerialColumn'],
 
-                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et
-                    dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip
-                    ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
-                    fugiat nulla pariatur.</p>
+                            'id',
+                            'created_at:datetime',
+                            'name',
+                            [
+                                'attribute' => 'birth_date',
+                                'value' => function (Candidates $model) {
+                                    if (!$model->birth_date)
+                                        return '';
 
-                <p><a class="btn btn-outline-secondary" href="http://www.yiiframework.com/forum/">Yii Forum &raquo;</a></p>
-            </div>
-            <div class="col-lg-4">
-                <h2>Heading</h2>
+                                    return date('d-m-Y', $model->birth_date);
+                                },
+                            ],
+                            [
+                                'attribute' => 'years_experience',
+                                'value' => function (Candidates $model) {
+                                    if (!$model->years_experience)
+                                        return '';
 
-                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et
-                    dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip
-                    ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
-                    fugiat nulla pariatur.</p>
-
-                <p><a class="btn btn-outline-secondary" href="http://www.yiiframework.com/extensions/">Yii Extensions &raquo;</a></p>
+                                    return $model->years_experience;
+                                },
+                            ],
+                            'frameworks',
+                            [
+                                'attribute' => 'resume',
+                                'value' => function (Candidates $model) {
+                                    return Html::a($model->resume, ['/' . Candidates::RESUME_DIR . '/' . $model->resume], ['target' => '_blank', 'title' => 'Переглянути']);
+                                },
+                                'format' => 'raw',
+                            ],
+                            'comment',
+                            [
+                                'class' => ActionColumn::class,
+                                'template' => '{update} {delete}',
+                            ],
+                        ],
+                    ]); ?>
+                <?php endif; ?>
             </div>
         </div>
 
